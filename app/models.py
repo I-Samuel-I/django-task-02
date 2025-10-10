@@ -1,8 +1,11 @@
 import os
 from uuid import uuid4
 
-from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
-                                        PermissionsMixin)
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -49,11 +52,13 @@ def validar_tamanho_arquivo(arquivo):
     if arquivo.size > 2 * 1024 * 1024:  # 2 MB
         raise ValidationError("O arquivo excede o tamanho máximo de 2MB!")
 
+
 def validar_tipo_arquivo(arquivo):
     ext_permitidas = ['pdf', 'jpg', 'jpeg', 'png']
     ext = arquivo.name.split('.')[-1].lower()
     if ext not in ext_permitidas:
         raise ValidationError("Tipo de arquivo não permitido! Permitidos: PDF, JPG, PNG.")
+
 
 def upload_path_usuario(instance, filename):
     ext = filename.split('.')[-1]
