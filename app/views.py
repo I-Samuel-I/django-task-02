@@ -3,27 +3,28 @@ import time
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, ListView
 
+from .decorators import log_upload_usuario_method
 from .forms import DocumentoForm
 from .models import Documento
 
 logger = logging.getLogger('myapp')
 
 
-def log_execucao(view_func):
+def log_request_duration(view_func):
     def wrapper(request, *args, **kwargs):
-        inicio = time.time()
+        start_time = time.time()
         response = view_func(request, *args, **kwargs)
-        duracao = time.time() - inicio
-        logger.info(f"View {view_func.__name__} executada em {duracao:.2f}s")
+        duration = time.time() - start_time
+        logger.info(f"View {view_func.__name__}: {duration:.3f}s")
         return response
     return wrapper
 
 
+@method_decorator(log_upload_usuario_method, name='form_valid')
 class DocumentoCreateView(LoginRequiredMixin, CreateView):
     model = Documento
     form_class = DocumentoForm
@@ -39,7 +40,7 @@ class DocumentoCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-@method_decorator(log_execucao, name='dispatch')
+@method_decorator(log_request_duration, name='dispatch')
 class DocumentoListView(LoginRequiredMixin, ListView):
     model = Documento
     template_name = 'documentos/lista.html'
@@ -47,3 +48,4 @@ class DocumentoListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Documento.objects.filter(usuario=self.request.user)
+
